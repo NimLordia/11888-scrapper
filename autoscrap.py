@@ -45,42 +45,11 @@ def has_data(page_number):
 
 # --- Backward scanning to find the lowest page with data ---
 
-page =selenium
-while page >= lower_bound:
-    url = f"https://www.11888.gr/search/white_pages/{page}/"
-    print(f"Checking page: {page} - {url}")
-    driver.get(url)
-    time.sleep(0.5)
-    
-    if has_data(page):
-        print(f"Data found on page {page}.")
-        lowest_page_with_data = page  # update the lowest page seen with data
-        consecutive_empty = 0  # reset counter
-    else:
-        print(f"No data on page {page}.")
-        consecutive_empty += 1
-
-    # If too many empty pages in a row, assume no further data exists below.
-    if consecutive_empty >= max_consecutive_empty:
-        print(f"Encountered {max_consecutive_empty} consecutive pages without data. Stopping backward scan.")
-        break
-
-    page -= 1
-
-if lowest_page_with_data is None:
-    print("No page with data found in the given range.")
-    driver.quit()
-    conn.close()
-    exit()
-
-print(f"Lowest page with data found: {lowest_page_with_data}")
 
 # --- Scraping upward from the lowest page with data ---
-scrape_page = lowest_page_with_data
-consecutive_empty_scrape = 0
-max_consecutive_empty_scrape = 50  # Stop scraping if 50 consecutive pages have no data
+scrape_page = 1 #change this number for the first page to check
 
-while consecutive_empty_scrape < max_consecutive_empty_scrape:
+while consecutive_empty_scrape < 50000000: #add upper limit, otherwise change to While True
     url = f"https://www.11888.gr/search/white_pages/{scrape_page}/"
     print(f"Scraping page: {scrape_page} - {url}")
     driver.get(url)

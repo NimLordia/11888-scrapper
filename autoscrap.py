@@ -1,6 +1,6 @@
-import random
 import time
 import sqlite3
+import random
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
@@ -20,14 +20,10 @@ CREATE TABLE IF NOT EXISTS contacts (
 ''')
 conn.commit()
 
-# --- Setup Selenium WebDriver ---
+# --- Setup Selenium Service ---
 service = Service()  # Specify chromedriver path if needed
-options = webdriver.ChromeOptions()
-options.add_argument('--headless')
-options.add_argument("--disable-gpu")
-options.add_argument("--log-level=3")
-driver = webdriver.Chrome(service=service, options=options)
 
+# --- List of Proxies ---
 proxies = [
     "http://proxy1:port",  # Replace with your actual proxy addresses
     "http://proxy2:port",
@@ -44,7 +40,7 @@ def create_driver(proxy):
         options.add_argument(f'--proxy-server={proxy}')
     return webdriver.Chrome(service=service, options=options)
 
-def has_data(page_number):
+def has_data(page_number, driver):
     """
     Returns True if the page at the given number contains data.
     If there's no data, the site may redirect away from the search URL.
@@ -61,10 +57,16 @@ def has_data(page_number):
         return False
 
 scrape_page = 1  # Change this number for the first page to check
+previous_proxy = None  # Variable to store the previous proxy
 
 while scrape_page < 50000000:  # or use "while True" if desired
-    # Rotate IP by selecting a random proxy
+    # Rotate IP by selecting a random proxy and ensure it's different from the previous one (if possible)
     proxy = random.choice(proxies)
+    if previous_proxy is not None and len(proxies) > 1:
+        while proxy == previous_proxy:
+            proxy = random.choice(proxies)
+    previous_proxy = proxy
+
     driver = create_driver(proxy)
     
     url = f"https://www.11888.gr/search/white_pages/{scrape_page}/"

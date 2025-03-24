@@ -1,3 +1,4 @@
+import random
 import time
 import sqlite3
 from selenium import webdriver
@@ -27,6 +28,22 @@ options.add_argument("--disable-gpu")
 options.add_argument("--log-level=3")
 driver = webdriver.Chrome(service=service, options=options)
 
+proxies = [
+    "http://proxy1:port",  # Replace with your actual proxy addresses
+    "http://proxy2:port",
+    "http://proxy3:port"
+]
+
+def create_driver(proxy):
+    """Creates a new Chrome WebDriver instance with the given proxy."""
+    options = webdriver.ChromeOptions()
+    options.add_argument('--headless')
+    options.add_argument("--disable-gpu")
+    options.add_argument("--log-level=3")
+    if proxy:
+        options.add_argument(f'--proxy-server={proxy}')
+    return webdriver.Chrome(service=service, options=options)
+
 def has_data(page_number):
     """
     Returns True if the page at the given number contains data.
@@ -34,7 +51,7 @@ def has_data(page_number):
     """
     url = f"https://www.11888.gr/search/white_pages/{page_number}/"
     driver.get(url)
-    time.sleep(0.5)  # Allow time for page to load
+    time.sleep(0.2)  # Allow time for page to load
     if "search/white_pages" not in driver.current_url:
         return False
     try:
@@ -43,25 +60,23 @@ def has_data(page_number):
     except Exception:
         return False
 
-# --- Backward scanning to find the lowest page with data ---
+scrape_page = 1  # Change this number for the first page to check
 
-
-# --- Scraping upward from the lowest page with data ---
-scrape_page = 1 #change this number for the first page to check
-
-while consecutive_empty_scrape < 50000000: #add upper limit, otherwise change to While True
+while scrape_page < 50000000:  # or use "while True" if desired
+    # Rotate IP by selecting a random proxy
+    proxy = random.choice(proxies)
+    driver = create_driver(proxy)
+    
     url = f"https://www.11888.gr/search/white_pages/{scrape_page}/"
-    print(f"Scraping page: {scrape_page} - {url}")
+    print(f"Scraping page: {scrape_page} using proxy: {proxy} - {url}")
     driver.get(url)
-    time.sleep(0.5)
+    time.sleep(0.2)
     
     details_containers = driver.find_elements(By.CSS_SELECTOR, "div.details")
     if not details_containers:
         print(f"No details found on page {scrape_page}.")
-        consecutive_empty_scrape += 1
     else:
         print(f"Data found on page {scrape_page}.")
-        consecutive_empty_scrape = 0  # reset since we found data
         for container in details_containers:
             driver.execute_script("arguments[0].scrollIntoView();", container)
             # --- Extract the name ---
@@ -103,9 +118,8 @@ while consecutive_empty_scrape < 50000000: #add upper limit, otherwise change to
             conn.commit()
             print(f"Inserted: {name} | {location} | {phones} | {page_url}")
     
+    driver.quit()  # Close the driver to change IP on the next iteration
     scrape_page += 1
 
-print("No data found for 50 consecutive pages. Stopping scraping.")
-driver.quit()
-conn.close()
 print("Scraping complete!")
+conn.close()

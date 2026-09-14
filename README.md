@@ -48,7 +48,7 @@ Missing content, redirects, and navigation/selector errors are logged as **unres
 
 An optional `--proxy http://proxy.example:8080` configures one proxy for your network; the default is a direct connection. The old rotating placeholder proxy list was removed.
 
-The live adapter waits for `div.details` and reuses the original name, address, and phone selectors. Selector presence alone does not prove a fully loaded or complete listing. Consent pages, rate limits, dynamic content, and site redesigns are not handled. Use only for permitted collection; review the site's current access rules before running it. Keep collected personal records and profile URL lists out of version control. No real directory records are included in the current source tree. The old database remains in the existing repository's Git history; this refactor does not rewrite history.
+The live adapter waits for `div.details` and reuses the original name, address, and phone selectors. Selector presence alone does not prove a fully loaded or complete listing. Consent pages, rate limits, dynamic content, and site redesigns are not handled. Use only for permitted collection; review the site's current access rules before running it. Keep collected personal records and profile URL lists out of version control. No real directory records are included in the current source tree. The collected database was removed from published branch history on September 14, 2026. Old clones need separate cleanup, and GitHub Support must purge cached historical copies.
 
 ## Data and export
 
